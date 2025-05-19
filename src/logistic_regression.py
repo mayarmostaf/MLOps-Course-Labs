@@ -2,6 +2,7 @@
 This module contains functions to preprocess and train the model
 for bank consumer churn prediction.
 """
+import joblib
 import argparse
 import os
 import pandas as pd
@@ -108,6 +109,7 @@ def preprocess(df):
     X_test = pd.DataFrame(X_test, columns=col_transf.get_feature_names_out())
 
     # Log the transformer as an artifact
+    joblib.dump(col_transf, "column_transformer.pkl")
     mlflow.log_artifact("column_transformer.pkl", artifact_path="transformer")
     return col_transf, X_train, X_test, y_train, y_test
 
@@ -129,10 +131,14 @@ def train(X_train, y_train):
     # Infer signature (input and output schema)
 
     # Log model
-    mlflow.sklearn.log_model(log_reg, "model", input_schema=X_train, output_schema=y_train)
+    signature = mlflow.models.infer_signature(X_train, y_train)
+    mlflow.sklearn.log_model(log_reg, "model", signature=signature)
 
     ### Log the data
-    mlflow.log_artifact("../data/Churn_Modelling.csv", artifact_path="data")
+    script_path = os.path.abspath(__file__)
+    script_dir = os.path.dirname(script_path)
+    file_path = os.path.normpath(os.path.join(script_dir, "../data/Churn_Modelling.csv"))
+    mlflow.log_artifact(file_path, artifact_path="data")
     return log_reg
 
 
@@ -140,11 +146,14 @@ def main(max_itr):
     ### Set the tracking URI for MLflow
     mlflow.set_tracking_uri("http://localhost:5000")
     ### Set the experiment name
-    mlflow.set_experiment("bank-consumer-churn-prediction")
+    mlflow.set_experiment("bank-consumer-churn-prediction-logistic-regression")
 
     ### Start a new run and leave all the main function code as part of the experiment
     mlflow.start_run()
-    df = pd.read_csv("../data/Churn_Modelling.csv")
+    script_path = os.path.abspath(__file__)
+    script_dir = os.path.dirname(script_path)
+    file_path = os.path.normpath(os.path.join(script_dir, "../data/Churn_Modelling.csv"))
+    df = pd.read_csv(file_path)
     col_transf, X_train, X_test, y_train, y_test = preprocess(df)
 
     ### Log the max_iter parameter
@@ -169,8 +178,10 @@ def main(max_itr):
         confusion_matrix=conf_mat, display_labels=model.classes_
     )
     conf_mat_disp.plot()
-    
+    plt.savefig("confusion_matrix.png")
+
     # Log the image as an artifact in MLflow
+    
     mlflow.log_artifact("confusion_matrix.png", artifact_path="confusion_matrix")
     mlflow.end_run()
     plt.show()

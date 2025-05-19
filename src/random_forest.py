@@ -3,13 +3,15 @@ This module contains functions to preprocess and train the model
 for bank consumer churn prediction.
 """
 import argparse
+import os
+import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.utils import resample
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.compose import make_column_transformer
-from sklearn.preprocessing import OneHotEncoder,  StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -18,20 +20,19 @@ from sklearn.metrics import (
     confusion_matrix,
     ConfusionMatrixDisplay,
 )
-
-### Import MLflow
+from mlflow.models import infer_signature
 import mlflow
+
+
 def rebalance(data):
     """
     Resample data to keep balance between target classes.
-
-    The function uses the resample function to downsample the majority class to match the minority class.
 
     Args:
         data (pd.DataFrame): DataFrame
 
     Returns:
-        pd.DataFrame): balanced DataFrame
+        pd.DataFrame: balanced DataFrame
     """
     churn_0 = data[data["Exited"] == 0]
     churn_1 = data[data["Exited"] == 1]
@@ -95,7 +96,7 @@ def preprocess(df):
         X, y, test_size=0.3, random_state=1912
     )
     col_transf = make_column_transformer(
-        (StandardScaler(), num_cols), 
+        (StandardScaler(), num_cols),
         (OneHotEncoder(handle_unknown="ignore", drop="first"), cat_cols),
         remainder="passthrough",
     )
@@ -106,9 +107,12 @@ def preprocess(df):
     X_test = col_transf.transform(X_test)
     X_test = pd.DataFrame(X_test, columns=col_transf.get_feature_names_out())
 
-    # Log the transformer as an artifact
+    # Save and log the transformer
+    joblib.dump(col_transf, "column_transformer.pkl")
     mlflow.log_artifact("column_transformer.pkl", artifact_path="transformer")
+
     return col_transf, X_train, X_test, y_train, y_test
+
 
 def train(X_train, y_train):
     """
@@ -121,71 +125,72 @@ def train(X_train, y_train):
     Returns:
         RandomForestClassifier: trained random forest model
     """
-    # Train the model
     rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
     rf_model.fit(X_train, y_train)
 
-    # Infer signature (input and output schema)
+    # Infer model signature
     signature = infer_signature(X_train, rf_model.predict(X_train))
 
-    # Log the model
+    # Log the model with signature
     mlflow.sklearn.log_model(rf_model, "model", signature=signature)
 
-    # Log the dataset file
-    mlflow.log_artifact("../data/Churn_Modelling.csv", artifact_path="data")
-
+    # Return the trained model
     return rf_model
 
 
-
 def main(max_iter):
-    ### Set the tracking URI for MLflow
     mlflow.set_tracking_uri("http://localhost:5000")
-    ### Set the experiment name
-    mlflow.set_experiment("bank-consumer-churn-prediction")
+    mlflow.set_experiment("bank-consumer-churn-prediction-random-forest")
 
-    ### Start a new run and leave all the main function code as part of the experiment
-    mlflow.start_run()
-    df = pd.read_csv("../data/Churn_Modelling.csv")
-    col_transf, X_train, X_test, y_train, y_test = preprocess(df)
+    # Resolve absolute file path
+    script_path = os.path.abspath(__file__)
+    script_dir = os.path.dirname(script_path)
+    file_path = os.path.normpath(os.path.join(script_dir, "../data/Churn_Modelling.csv"))
 
-    ### Log the max_iter parameter
-    mlflow.log_param("max_iter", 1000)
-    model = train(X_train, y_train)
+    with mlflow.start_run():
+        df = pd.read_csv(file_path)
 
-    
-    y_pred = model.predict(X_test)
+        col_transf, X_train, X_test, y_train, y_test = preprocess(df)
 
-    ### Log metrics after calculating them
-    mlflow.log_metric("accuracy", accuracy_score(y_test, y_pred))
-    mlflow.log_metric("precision", precision_score(y_test, y_pred))
-    mlflow.log_metric("recall", recall_score(y_test, y_pred))
-    mlflow.log_metric("f1", f1_score(y_test, y_pred))
+        # Log max_iter param (even if unused for RF)
+        mlflow.log_param("max_iter", max_iter)
 
-    ### Log tag
-    mlflow.set_tag("model", "logistic_regression")
+        # Train and log model
+        model = train(X_train, y_train)
 
-    
-    conf_mat = confusion_matrix(y_test, y_pred, labels=model.classes_)
-    conf_mat_disp = ConfusionMatrixDisplay(
-        confusion_matrix=conf_mat, display_labels=model.classes_
-    )
-    conf_mat_disp.plot()
-    
-    # Log the image as an artifact in MLflow
-    mlflow.log_artifact("confusion_matrix.png", artifact_path="confusion_matrix")
-    mlflow.end_run()
-    plt.show()
+        # Log dataset file as artifact
+        mlflow.log_artifact(file_path, artifact_path="data")
+
+        y_pred = model.predict(X_test)
+
+        # Log metrics
+        mlflow.log_metric("accuracy", accuracy_score(y_test, y_pred))
+        mlflow.log_metric("precision", precision_score(y_test, y_pred))
+        mlflow.log_metric("recall", recall_score(y_test, y_pred))
+        mlflow.log_metric("f1", f1_score(y_test, y_pred))
+
+        mlflow.set_tag("model", "random_forest")
+
+        # Plot confusion matrix and save BEFORE logging
+        conf_mat = confusion_matrix(y_test, y_pred, labels=model.classes_)
+        conf_mat_disp = ConfusionMatrixDisplay(
+            confusion_matrix=conf_mat, display_labels=model.classes_
+        )
+        conf_mat_disp.plot()
+        plt.savefig("confusion_matrix.png")
+
+        mlflow.log_artifact("confusion_matrix.png", artifact_path="confusion_matrix")
+
+        plt.show()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Logistic Regression Model")
+    parser = argparse.ArgumentParser(description="Random Forest Model")
     parser.add_argument(
         "--max_iter",
         type=int,
         default=1000,
-        help="Maximum number of iterations for the logistic regression model",
+        help="Maximum number of iterations for the model (unused for RF, logged for consistency)",
     )
     args = parser.parse_args()
-    max_iter = args.max_iter
-    main(max_iter)
+    main(args.max_iter)
