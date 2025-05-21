@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+import mlflow
+import numpy as np
 
 app = FastAPI()
 #pip install fastapi uvicorn add to req.txt
@@ -15,7 +17,9 @@ class Features(BaseModel):
     IsActiveMember: int = Field(..., description="Whether the customer is an active member (0 or 1)")
     EstimatedSalary: float = Field(..., description="Estimated yearly salary of the customer")
 
-
+# Load the MLflow model
+model_uri = "models:/top_churn_models/production"  
+model = mlflow.sklearn.load_model(model_uri)
 
 @app.get("/")
 def root():
@@ -27,4 +31,8 @@ def get_health():
 
 @app.get("/predict")
 def get_prediction(x: Features):
-    return {"prediction":"prediction-value"}
+    input_data = np.array([
+        [Features.Geography, Features.Gender, Features.CreditScore, Features.Age,Features.Tenure, Features.Balance, Features.NumOfProducts,Features.HasCrCard ,Features.Balance, Features.NumOfProducts ,Features.IsActiveMember ,Features.EstimatedSalary]
+    ])
+    prediction = model.predict(input_data)
+    return {"prediction": int(prediction[0])}
