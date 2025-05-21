@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1747830238036
+current_stage: Staging
+description: ''
+last_updated_timestamp: 1747830238054
+name: top_churn_models
+run_id: 9e8834fb4d3a4415ba26bcc0af67e7ed
+run_link: ''
+source: mlflow-artifacts:/833220058343819658/9e8834fb4d3a4415ba26bcc0af67e7ed/artifacts/model
+status: READY
+status_message: null
+storage_location: mlflow-artifacts:/833220058343819658/9e8834fb4d3a4415ba26bcc0af67e7ed/artifacts/model
+user_id: null
+version: 2

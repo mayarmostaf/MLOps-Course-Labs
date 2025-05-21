@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/833220058343819658/51fc7a6fd906417fb9928a46812cb49d/artifacts
+end_time: 1747829787618
+entry_point_name: ''
+experiment_id: '833220058343819658'
+lifecycle_stage: active
+run_id: 51fc7a6fd906417fb9928a46812cb49d
+run_name: secretive-rook-441
+run_uuid: 51fc7a6fd906417fb9928a46812cb49d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747829782748
+status: 3
+tags: []
+user_id: ola

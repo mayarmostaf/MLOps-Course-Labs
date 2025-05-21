@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/859723155855443291/0aa2c34c0ee94eefbc7e02c4ffe472f7/artifacts
+end_time: 1747829263697
+entry_point_name: ''
+experiment_id: '859723155855443291'
+lifecycle_stage: active
+run_id: 0aa2c34c0ee94eefbc7e02c4ffe472f7
+run_name: rogue-bird-356
+run_uuid: 0aa2c34c0ee94eefbc7e02c4ffe472f7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747829256247
+status: 3
+tags: []
+user_id: ola

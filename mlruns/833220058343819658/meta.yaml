@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/833220058343819658
+creation_time: 1747829782678
+experiment_id: '833220058343819658'
+last_update_time: 1747829782678
+lifecycle_stage: active
+name: bank-consumer-churn-prediction-xgboost

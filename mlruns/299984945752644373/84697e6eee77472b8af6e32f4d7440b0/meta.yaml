@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/299984945752644373/84697e6eee77472b8af6e32f4d7440b0/artifacts
+end_time: 1747829338058
+entry_point_name: ''
+experiment_id: '299984945752644373'
+lifecycle_stage: active
+run_id: 84697e6eee77472b8af6e32f4d7440b0
+run_name: colorful-tern-128
+run_uuid: 84697e6eee77472b8af6e32f4d7440b0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747829333105
+status: 3
+tags: []
+user_id: ola

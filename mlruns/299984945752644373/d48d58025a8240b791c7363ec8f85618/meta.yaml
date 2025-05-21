@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/299984945752644373/d48d58025a8240b791c7363ec8f85618/artifacts
+end_time: 1747829598833
+entry_point_name: ''
+experiment_id: '299984945752644373'
+lifecycle_stage: active
+run_id: d48d58025a8240b791c7363ec8f85618
+run_name: intelligent-skink-11
+run_uuid: d48d58025a8240b791c7363ec8f85618
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747829408873
+status: 4
+tags: []
+user_id: ola

@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/299984945752644373
+creation_time: 1747829333040
+experiment_id: '299984945752644373'
+last_update_time: 1747829333040
+lifecycle_stage: active
+name: bank-consumer-churn-prediction-random-forest

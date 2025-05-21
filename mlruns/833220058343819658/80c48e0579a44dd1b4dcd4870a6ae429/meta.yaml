@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/833220058343819658/80c48e0579a44dd1b4dcd4870a6ae429/artifacts
+end_time: 1747829872138
+entry_point_name: ''
+experiment_id: '833220058343819658'
+lifecycle_stage: active
+run_id: 80c48e0579a44dd1b4dcd4870a6ae429
+run_name: sneaky-mole-702
+run_uuid: 80c48e0579a44dd1b4dcd4870a6ae429
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747829868094
+status: 3
+tags: []
+user_id: ola

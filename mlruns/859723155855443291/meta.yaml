@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/859723155855443291
+creation_time: 1747829256100
+experiment_id: '859723155855443291'
+last_update_time: 1747829256100
+lifecycle_stage: active
+name: bank-consumer-churn-prediction-logistic-regression

@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1747830715128
+current_stage: Archived
+description: ''
+last_updated_timestamp: 1747830823712
+name: top_churn_models
+run_id: 377a03cd93214008aa7684c12be8a2ff
+run_link: ''
+source: mlflow-artifacts:/299984945752644373/377a03cd93214008aa7684c12be8a2ff/artifacts/model
+status: READY
+status_message: null
+storage_location: mlflow-artifacts:/299984945752644373/377a03cd93214008aa7684c12be8a2ff/artifacts/model
+user_id: null
+version: 3
