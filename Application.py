@@ -1,38 +1,57 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel, Field
 import mlflow
+import joblib
 import numpy as np
+import pandas as pd
+from typing import List
+import logging
 
 app = FastAPI()
-#pip install fastapi uvicorn add to req.txt
+#remeber requirements include fastapi univcorn logging
+# Define input schema
 class Features(BaseModel):
-    Geography: str = Field(..., description="Country of the customer, e.g., 'France', 'Spain', 'Germany'")
-    Gender: str = Field(..., description="Customer's gender: 'Male' or 'Female'")
-    CreditScore: int = Field(..., description="Credit score of the customer")
-    Age: int = Field(..., description="Age of the customer in years")
-    Tenure: int = Field(..., description="Number of years the customer has been with the bank")
-    Balance: float = Field(..., description="Account balance of the customer")
-    NumOfProducts: int = Field(..., description="Number of bank products the customer is using")
-    HasCrCard: int = Field(..., description="Whether the customer has a credit card (0 or 1)")
-    IsActiveMember: int = Field(..., description="Whether the customer is an active member (0 or 1)")
-    EstimatedSalary: float = Field(..., description="Estimated yearly salary of the customer")
+    Geography: str
+    Gender: str
+    CreditScore: int
+    Age: int
+    Tenure: int
+    Balance: float
+    NumOfProducts: int
+    HasCrCard: int
+    IsActiveMember: int
+    EstimatedSalary: float
 
-# Load the MLflow model
-model_uri = "models:/top_churn_models/production"  
+# Load model from MLflow
+model_uri = "models:/top_churn_models/production"
 model = mlflow.sklearn.load_model(model_uri)
 
+# Load transformer (same one used in training)
+transformer_path = "column_transformer.pkl"  # Ensure this file exists in your project directory
+transformer = joblib.load(transformer_path)
+
+#logging setup 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 @app.get("/")
 def root():
-    return {"message":"welcome to churn prediction API :)"}
+    logging.info(f"welcoming message")
+    return {"message": "Welcome to the churn prediction API!"}
 
 @app.get("/health")
-def get_health():
-    return {"status": "healthy"}     
+def health_check():
+    logging.info(f"checking health")
+    return {"status": "healthy"}
 
-@app.get("/predict")
-def get_prediction(x: Features):
-    input_data = np.array([
-        [Features.Geography, Features.Gender, Features.CreditScore, Features.Age,Features.Tenure, Features.Balance, Features.NumOfProducts,Features.HasCrCard ,Features.Balance, Features.NumOfProducts ,Features.IsActiveMember ,Features.EstimatedSalary]
-    ])
-    prediction = model.predict(input_data)
+@app.post("/predict")
+def predict(features: Features):
+    # Create DataFrame from input
+    input_dict = features.dict()
+    input_df = pd.DataFrame([input_dict])
+
+    # Transform input using saved pipeline
+    transformed_input = transformer.transform(input_df)
+
+    # Predict
+    prediction = model.predict(transformed_input)
+    logging.info(f"Prediction result: {result} with the input {input_df}")
     return {"prediction": int(prediction[0])}
