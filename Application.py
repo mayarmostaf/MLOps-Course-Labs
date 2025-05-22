@@ -10,8 +10,6 @@ import xgboost as xgb
 import os
 
 app = FastAPI()
-#remeber requirements include fastapi univcorn logging pip install pytest httpx
-
 # Define input schema
 class Features(BaseModel):
     Geography: str
