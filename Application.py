@@ -9,7 +9,8 @@ import logging
 import xgboost as xgb
 
 app = FastAPI()
-#remeber requirements include fastapi univcorn logging
+#remeber requirements include fastapi univcorn logging pip install pytest httpx
+
 # Define input schema
 class Features(BaseModel):
     Geography: str
@@ -53,6 +54,7 @@ def predict(features: Features):
     transformed_input = transformer.transform(input_df)
 
     # Predict
-    prediction = model.predict(transformed_input)
-    logging.info(f"Prediction result: {result} with the input {input_df}")
+    dmatrix_input = xgb.DMatrix(transformed_input)
+    prediction = model.predict(dmatrix_input)
+    logging.info(f"Prediction result: {prediction} with the input {input_df}")
     return {"prediction": int(prediction[0])}
