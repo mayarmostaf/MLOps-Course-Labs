@@ -16,20 +16,19 @@ def test_health_check():
 
 def test_predict():
     test_data = {
-                "Geography": "France",
-                "Gender": "Female",
-                "CreditScore": 619,
-                "Age": 42,
-                "Tenure": 2,
-                "Balance": 0,
-                "NumOfProducts": 1,
-                "HasCrCard": 1,
-                "IsActiveMember": 1,
-                "EstimatedSalary": 101348
-                }
-    
-    response = client.get("/predict", params=test_data)
-    
+        "Geography": "France",
+        "Gender": "Female",
+        "CreditScore": 619,
+        "Age": 42,
+        "Tenure": 2,
+        "Balance": 0,
+        "NumOfProducts": 1,
+        "HasCrCard": 1,
+        "IsActiveMember": 1,
+        "EstimatedSalary": 101348
+    }
+
+    response = client.post("/predict", json=test_data)
     assert response.status_code == 200
     assert "prediction" in response.json()
-    assert response.json()["prediction"] in [0, 1] 
+    assert response.json()["prediction"] in [0, 1]

@@ -7,6 +7,7 @@ import pandas as pd
 from typing import List
 import logging
 import xgboost as xgb
+import os
 
 app = FastAPI()
 #remeber requirements include fastapi univcorn logging pip install pytest httpx
@@ -25,11 +26,13 @@ class Features(BaseModel):
     EstimatedSalary: float
 
 # Load model from MLflow
-model_path = "bin/model.xgb"
+script_path = os.path.abspath(__file__)
+script_dir = os.path.dirname(script_path)
+model_path = os.path.normpath(os.path.join(script_dir,"bin/model.xgb"))
 model = xgb.Booster()
 model.load_model(model_path)
 # Load transformer (same one used in training)
-transformer_path = "bin/column_transformer.pkl"  # Ensure this file exists in your project directory
+transformer_path = os.path.normpath(os.path.join(script_dir,"bin/column_transformer.pkl"))
 transformer = joblib.load(transformer_path)
 
 #logging setup 
@@ -44,16 +47,11 @@ def health_check():
     logging.info(f"checking health")
     return {"status": "healthy"}
 
-@app.get("/predict")
+@app.post("/predict")
 def predict(features: Features):
-    # Create DataFrame from input
     input_dict = features.dict()
     input_df = pd.DataFrame([input_dict])
-
-    # Transform input using saved pipeline
     transformed_input = transformer.transform(input_df)
-
-    # Predict
     dmatrix_input = xgb.DMatrix(transformed_input)
     prediction = model.predict(dmatrix_input)
     logging.info(f"Prediction result: {prediction} with the input {input_df}")
