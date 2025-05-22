@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from typing import List
 import logging
+import xgboost as xgb
 
 app = FastAPI()
 #remeber requirements include fastapi univcorn logging
@@ -23,11 +24,11 @@ class Features(BaseModel):
     EstimatedSalary: float
 
 # Load model from MLflow
-model_uri = "models:/top_churn_models/production"
-model = mlflow.sklearn.load_model(model_uri)
-
+model_path = "bin/model.xgb"
+model = xgb.Booster()
+model.load_model(model_path)
 # Load transformer (same one used in training)
-transformer_path = "column_transformer.pkl"  # Ensure this file exists in your project directory
+transformer_path = "bin/column_transformer.pkl"  # Ensure this file exists in your project directory
 transformer = joblib.load(transformer_path)
 
 #logging setup 
@@ -42,7 +43,7 @@ def health_check():
     logging.info(f"checking health")
     return {"status": "healthy"}
 
-@app.post("/predict")
+@app.get("/predict")
 def predict(features: Features):
     # Create DataFrame from input
     input_dict = features.dict()
