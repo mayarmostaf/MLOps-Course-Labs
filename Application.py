@@ -8,8 +8,10 @@ from typing import List
 import logging
 import xgboost as xgb
 import os
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI()
+Instrumentator().instrument(app).expose(app)
 # Define input schema
 class Features(BaseModel):
     Geography: str
